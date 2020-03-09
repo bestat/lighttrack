@@ -7,6 +7,7 @@
 '''
 import time
 import argparse
+from tqdm import tqdm
 
 # import vision essentials
 import cv2
@@ -96,7 +97,10 @@ def light_track(pose_estimator,
     num_imgs = len(img_paths)
     total_num_FRAMES = num_imgs
 
+    pbar = tqdm(total=num_imgs)
+    
     while img_id < num_imgs-1:
+        pbar.update(1)
         img_id += 1
         img_path = img_paths[img_id]
         print("Current tracking: [image_id:{}]".format(img_id))
@@ -296,6 +300,7 @@ def light_track(pose_estimator,
                     keypoints_list_next.append(keypoints_dict_next)
 
                 else:
+                    pbar.update(-1) 
                     # remove this bbox, do not register its keypoints
                     bbox_det_dict_next = {"img_id":img_id,
                                           "det_id":  det_id,
@@ -331,6 +336,8 @@ def light_track(pose_estimator,
     ''' 1. statistics: get total time for lighttrack processing'''
     end_time_total = time.time()
     total_time_ALL += (end_time_total - st_time_total)
+    pbar.close()
+
 
     # convert results into openSVAI format
     print("Exporting Results in openSVAI Standard Json Format...")
@@ -775,7 +782,7 @@ def bbox_invalid(bbox):
 if __name__ == '__main__':
     global args
     parser = argparse.ArgumentParser()
-    parser.add_argument('--video_path', '-v', type=str, dest='video_path', default="data/demo/video.mp4")
+    parser.add_argument('--video_path', '-v', type=str, dest='video_path', default="data/demo/gray_XVR_ch21_main_20191214170020_20191214173020.mp4")
     parser.add_argument('--model', '-m', type=str, dest='test_model', default="weights/mobile-deconv/snapshot_296.ckpt")
     args = parser.parse_args()
     args.bbox_thresh = 0.4

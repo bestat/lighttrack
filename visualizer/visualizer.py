@@ -5,6 +5,7 @@
     E-mail: guanghan.ning@jd.com
     Created on June 19th, 2018
 '''
+import csv
 import sys, os
 sys.path.insert(0, os.path.abspath("../detect_to_standard/"))
 from detection_visualizer import *
@@ -17,6 +18,7 @@ draw_threshold = 0.4
 def show_all_from_standard_json(json_file_path, classes, joint_pairs, joint_names, img_folder_path = None, output_folder_path = None, flag_track= False):
     # Visualizing: Detection + Pose Estimation
     dets = read_json_from_file(json_file_path)
+    joint_list = []
 
     for det in dets:
         python_data = det
@@ -34,7 +36,6 @@ def show_all_from_standard_json(json_file_path, classes, joint_pairs, joint_name
             score = candidate["det_score"]
             if score < draw_threshold: continue
 
-            '''
             # optional: show the bounding boxes
             if flag_track is True:
                 track_id = candidate["track_id"]
@@ -42,10 +43,13 @@ def show_all_from_standard_json(json_file_path, classes, joint_pairs, joint_name
             else:
                 #img = draw_bbox(img, bbox, score, classes)
                 img = draw_bbox(img, bbox, score, classes, -1, python_data["image"]["id"][0])  #for lighttrack
-            '''
+            
 
             pose_keypoints_2d = candidate["pose_keypoints_2d"]
             joints = reshape_keypoints_into_joints(pose_keypoints_2d)
+            for joint in joints:
+                x, y, _ = joint
+                joint_list.append((x,y))
 
             if flag_track is True:
                 track_id = candidate["track_id"]
@@ -58,6 +62,11 @@ def show_all_from_standard_json(json_file_path, classes, joint_pairs, joint_name
             create_folder(output_folder_path)
             img_output_path = os.path.join(output_folder_path, python_data["image"]["name"])
             cv2.imwrite(img_output_path, img)
+
+    with open('joints.csv','w') as f:
+        writer = csv.writer(f)
+        for joint in joint_list:
+            writer.writerow(joint)
     return
 
 
