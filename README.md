@@ -19,7 +19,7 @@ $ conda install -c anaconda cython
 
 condaで入らないものはpipでいれる。バージョンが3.7であることに注意して、
 ```
-$ pip install opencv-python pyyaml==5.3
+$ pip install opencv-python==4.2.0 pyyaml==5.3
 $ pip install torch==1.4.0 torchvision==0.5.0
 ```
 
