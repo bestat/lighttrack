@@ -18,7 +18,7 @@ import tensorflow as tf
 from network_mobile_deconv import Network
 
 # detector utils
-from detector.detector_yolov3 import *
+from detector.detector_yolov3 import inference_yolov3, inference_yolov3_from_img
 
 # pose estimation utils
 from HPE.dataset import Preprocessing

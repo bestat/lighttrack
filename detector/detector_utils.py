@@ -10,6 +10,11 @@ from torch.autograd import Variable
 import numpy as np
 import cv2
 
+
+def preprocess_img_for_frcnn(img, img_size=416):
+    pass
+
+
 def preprocess_img_for_yolo(img, img_size=416):
     input_img, _ = pad_to_square(img, 127.5)
     # Resize
