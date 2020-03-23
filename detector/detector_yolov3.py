@@ -100,6 +100,6 @@ def inference_yolov3_from_img(img):
 
 
 if __name__ == "__main__":
-    img_path = "./detector/messi.jpg"
+    img_path = "./detector/people.jpg"
     human_candidates = inference_yolov3(img_path)
     print("human_candidates:", human_candidates)

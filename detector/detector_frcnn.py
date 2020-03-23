@@ -41,12 +41,14 @@ img_detections = []  # Stores detections for each image index
 
 
 def inference_frcnn(img_path):
-    pass
+    img = Image.open(img_path)
+    return inference_frcnn_from_img(img)
 
 def inference_frcnn_from_img(img):
-    pass
+    human_candidates = get_prediction(img)
+    return human_candidates
 
-def get_prediction(img, threshold):
+def get_prediction(img, threshold=0.80):
     """
     get_prediction
     parameters:
@@ -60,43 +62,32 @@ def get_prediction(img, threshold):
         are chosen.
 
     """
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    img = Image.fromarray(img) # convert to PIL image
-
     transform = T.Compose([T.ToTensor()])
     img = transform(img)
+    if cuda:
+        img = img.cuda()
     pred = model([img])
-    pred_class = [COCO_INSTANCE_CATEGORY_NAMES[i] for i in list(pred[0]['labels'].numpy())]
-    pred_boxes = [[(i[0], i[1]), (i[2], i[3])] for i in list(pred[0]['boxes'].detach().numpy())]
-    pred_score = list(pred[0]['scores'].detach().numpy())
+    pred_class = [COCO_INSTANCE_CATEGORY_NAMES[i] for i in list(pred[0]['labels'].cpu().numpy())]
+    pred_boxes = [[(i[0], i[1]), (i[2], i[3])] for i in list(pred[0]['boxes'].detach().cpu().numpy())]
+    pred_score = list(pred[0]['scores'].detach().cpu().numpy())
     pred_t = [pred_score.index(x) for x in pred_score if x>threshold][-1]
     pred_boxes = pred_boxes[:pred_t+1]
     pred_class = pred_class[:pred_t+1]
-    return pred_boxes, pred_class
 
-def object_detection_api(img, threshold=0.5, rect_th=3, text_size=1, text_th=3):
-    """
-    object_detection_api
-    parameters:
-        - img_path - path of the input image
-        - threshold - threshold value for prediction score
-        - rect_th - thickness of bounding box
-        - text_size - size of the class label text
-        - text_th - thichness of the text
-    method:
-        - prediction is obtained from get_prediction method
-        - for each prediction, bounding box is drawn and text is written 
-        with opencv
-        - the final image is displayed
-    """
-    print(img.shape)
-    boxes, pred_cls = get_prediction(img, threshold)
-    for i in range(len(boxes)):
-        cv2.rectangle(img, boxes[i][0], boxes[i][1],color=(0, 255, 0), thickness=rect_th)
-        cv2.putText(img,pred_cls[i], boxes[i][0], cv2.FONT_HERSHEY_SIMPLEX, text_size, (0,255,0),thickness=text_th)
-    return img
+    human_candidates = []
+
+    for i in range(len(pred_boxes)):
+        if pred_class[i] == "person":
+            x1, y1 = pred_boxes[i][0]
+            x2, y2 = pred_boxes[i][1]
+            box_w = x2 - x1
+            box_h = y2 - y1
+            human_candidates.append([x1, y1, box_w, box_h])
+
+    return human_candidates
+
 
 if __name__ == "__main__":
-    img_path = "/export/guanghan/PyTorch-YOLOv3/data/samples/messi.jpg"
+    img_path = "./detector/people.jpg"
     human_candidates = inference_frcnn(img_path)
     print("human_candidates:", human_candidates)

@@ -5,8 +5,8 @@
     LightTrack: A Generic Framework for Online Top-Down Human Pose Tracking
     Demo on videos using YOLOv3 detector and Mobilenetv1-Deconv.
 '''
-import time
 import argparse
+import time
 from tqdm import tqdm
 
 # import vision essentials
@@ -19,6 +19,7 @@ from network_mobile_deconv import Network
 
 # detector utils
 from detector.detector_yolov3 import inference_yolov3, inference_yolov3_from_img
+# from detector.detector_frcnn import inference_frcnn
 
 # pose estimation utils
 from HPE.dataset import Preprocessing
@@ -34,7 +35,7 @@ from graph import visualize_pose_matching
 from graph  .visualize_pose_matching import *
 
 # import my own utils
-import sys, os, time
+import sys, os, time, shutil
 sys.path.append(os.path.abspath("./graph/"))
 from utils_json import *
 from visualizer import *
@@ -118,6 +119,7 @@ def light_track(pose_estimator,
             # perform detection at keyframes
             st_time_detection = time.time()
             human_candidates = inference_yolov3(img_path)
+            # human_candidates = inference_frcnn(img_path)
             end_time_detection = time.time()
             total_time_DET += (end_time_detection - st_time_detection)
 
@@ -782,7 +784,7 @@ def bbox_invalid(bbox):
 if __name__ == '__main__':
     global args
     parser = argparse.ArgumentParser()
-    parser.add_argument('--video_path', '-v', type=str, dest='video_path', default="data/demo/gray_XVR_ch21_main_20191214170020_20191214173020.mp4")
+    parser.add_argument('--video_path', '-v', type=str, dest='video_path', default="data/demo/XVR_ch21_main_20191214170020_20191214173020.mp4")
     parser.add_argument('--model', '-m', type=str, dest='test_model', default="weights/mobile-deconv/snapshot_296.ckpt")
     args = parser.parse_args()
     args.bbox_thresh = 0.4
@@ -813,6 +815,8 @@ if __name__ == '__main__':
         light_track(pose_estimator,
                     image_folder, output_json_path,
                     visualize_folder, output_video_path)
+
+        shutil.rmtree(visualize_folder)
 
         print("Finished video {}".format(output_video_path))
 
