@@ -31,8 +31,8 @@ from nms.gpu_nms import gpu_nms
 from nms.cpu_nms import cpu_nms
 
 # import GCN utils
-from graph import visualize_pose_matching
-from graph  .visualize_pose_matching import *
+from graph.visualize_pose_matching import graph_pair_to_data, pose_matching
+from graph.gcn_utils.keypoints_to_graph import keypoints_to_graph
 
 # import my own utils
 import sys, os, time, shutil
@@ -784,7 +784,7 @@ def bbox_invalid(bbox):
 if __name__ == '__main__':
     global args
     parser = argparse.ArgumentParser()
-    parser.add_argument('--video_path', '-v', type=str, dest='video_path', default="data/demo/XVR_ch21_diff_floor.mp4")
+    parser.add_argument('--video_path', '-v', type=str, dest='video_path', default="data/demo/videos/street.mp4")
     parser.add_argument('--model', '-m', type=str, dest='test_model', default="weights/mobile-deconv/snapshot_296.ckpt")
     args = parser.parse_args()
     args.bbox_thresh = 0.4
@@ -796,12 +796,12 @@ if __name__ == '__main__':
 
     video_path = args.video_path
     visualize_folder = "data/demo/visualize"
-    output_video_folder = "data/demo/videos"
+    output_video_folder = "data/demo/res"
     output_json_folder = "data/demo/jsons"
 
     video_name = os.path.basename(video_path)
     video_name = os.path.splitext(video_name)[0]
-    image_folder = os.path.join("data/demo", video_name)
+    image_folder = os.path.join("data/demo/videos", video_name)
     visualize_folder = os.path.join(visualize_folder, video_name)
     output_json_path = os.path.join(output_json_folder, video_name+".json")
     output_video_path = os.path.join(output_video_folder, video_name+"_out.mp4")
