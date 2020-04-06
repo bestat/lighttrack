@@ -1,20 +1,24 @@
 # largely borrowed from https://github.com/eriklindernoren/PyTorch-YOLOv3/blob/a68d786f6c9cb65d944c2f48eb7d219c914de11f/detect.py
 from __future__ import division
 
-from detector.models import *
-from detector.detector_utils import *
-
+import argparse
+import datetime
+import numpy as np
 import os
-os.environ['CUDA_VISIBLE_DEVICES']='0'
 import sys
 import time
-import datetime
-import argparse
+from PIL import Image
+
+os.environ['CUDA_VISIBLE_DEVICES']='0'
+sys.path.append("./")
 
 import torch
 from torch.utils.data import DataLoader
 from torchvision import datasets
 from torch.autograd import Variable
+
+from detector.models import Darknet
+from detector.detector_utils import preprocess_img_for_yolo, non_max_suppression
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--config_path", type=str, default="detector/config/yolov3.cfg", help="path to model config file")
@@ -96,6 +100,6 @@ def inference_yolov3_from_img(img):
 
 
 if __name__ == "__main__":
-    img_path = "/export/guanghan/PyTorch-YOLOv3/data/samples/messi.jpg"
+    img_path = "./detector/people.jpg"
     human_candidates = inference_yolov3(img_path)
     print("human_candidates:", human_candidates)
